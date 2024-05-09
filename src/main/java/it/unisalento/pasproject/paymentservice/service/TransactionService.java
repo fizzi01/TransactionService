@@ -2,6 +2,7 @@ package it.unisalento.pasproject.paymentservice.service;
 
 import it.unisalento.pasproject.paymentservice.business.io.exchanger.MessageExchangeStrategy;
 import it.unisalento.pasproject.paymentservice.business.io.exchanger.MessageExchanger;
+import it.unisalento.pasproject.paymentservice.business.io.producer.MessageProducer;
 import it.unisalento.pasproject.paymentservice.business.io.producer.MessageProducerStrategy;
 import it.unisalento.pasproject.paymentservice.domain.Transaction;
 import it.unisalento.pasproject.paymentservice.dto.MessageDTO;
@@ -16,8 +17,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class TransactionService {
 
-    @Autowired
-    private MessageExchanger messageExchanger;
 
     @Value("${rabbitmq.routing.execTransaction.name}")
     private String transactionExecutionRoutingKey;
@@ -28,9 +27,13 @@ public class TransactionService {
     @Value("${rabbitmq.queue.responseTransaction.name}")
     private String responseTransactionQueue;
 
-    @Autowired
-    @Qualifier("RabbitMQProducer")
-    private MessageProducerStrategy messageProducer;
+    private final MessageProducer messageProducer;
+
+    public TransactionService (MessageProducer messageProducer,@Qualifier("RabbitMQProducer") MessageProducerStrategy messageProducerStrategy) {
+        this.messageProducer = messageProducer;
+        messageProducer.setStrategy(messageProducerStrategy);
+    }
+
 
     public void requestTransaction(TransactionDTO transaction) {
 
@@ -57,5 +60,4 @@ public class TransactionService {
         return responseTransaction;
     }
 
-    // Creare Listener per la creazione di transazione tramite MQTT
 }

@@ -1,6 +1,5 @@
 package it.unisalento.pasproject.paymentservice.service;
 
-import com.rabbitmq.stream.Message;
 import it.unisalento.pasproject.paymentservice.domain.Transaction;
 import it.unisalento.pasproject.paymentservice.dto.MessageDTO;
 import it.unisalento.pasproject.paymentservice.dto.TransactionCreationDTO;
@@ -69,6 +68,7 @@ public class CreateTransactionSaga {
         if(messageDTO == null){
             throw new CommunicationErrorException();
         }
+
 
         //Se ritorna != da 200 la transazione non è andata a buon fine e non viene completata
         //Anche se non completata si salva tutto
