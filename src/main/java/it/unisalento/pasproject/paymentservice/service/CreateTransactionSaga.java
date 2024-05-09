@@ -4,11 +4,16 @@ import com.rabbitmq.stream.Message;
 import it.unisalento.pasproject.paymentservice.domain.Transaction;
 import it.unisalento.pasproject.paymentservice.dto.MessageDTO;
 import it.unisalento.pasproject.paymentservice.dto.TransactionCreationDTO;
+import it.unisalento.pasproject.paymentservice.dto.TransactionDTO;
 import it.unisalento.pasproject.paymentservice.exception.CommunicationErrorException;
+import it.unisalento.pasproject.paymentservice.exception.DatabaseErrorException;
+import it.unisalento.pasproject.paymentservice.repositories.TransactionRepository;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 // Deve inviare un messaggio al servizio wallet per prelevare i soldi dal wallet del sender
@@ -23,14 +28,18 @@ import java.time.LocalDateTime;
 @Service
 public class CreateTransactionSaga {
 
+    private final TransactionService transactionService;
+    private final TransactionRepository repository;
+    private final MessageService messageService;
+
     @Autowired
-    private TransactionService transactionService;
+    public CreateTransactionSaga(TransactionService transactionService, TransactionRepository repository, MessageService messageService) {
+        this.transactionService = transactionService;
+        this.repository = repository;
+        this.messageService = messageService;
+    }
 
-
-    @Autowired
-    private MessageService messageService;
-
-    public Transaction createTransaction(TransactionCreationDTO transactionDto) throws CommunicationErrorException {
+    public TransactionDTO createTransaction(TransactionCreationDTO transactionDto) throws DatabaseErrorException {
 
         Transaction transaction = new Transaction();
         transaction.setSenderEmail(transactionDto.getSenderEmail());
@@ -39,23 +48,50 @@ public class CreateTransactionSaga {
         transaction.setDescription(transactionDto.getDescription());
         transaction.setCreationDate(LocalDateTime.now());
 
-        // Check if the sender has enough money
-        MessageDTO response = transactionService.requestTransaction(transactionDto);
+        //Salvo la transazione
+        try{
+            transaction = repository.save(transaction);
+        } catch (Exception e) {
+            throw new DatabaseErrorException();
+        }
 
-        if (messageService.isServerError(response)) {
+        TransactionDTO transactionDTO = transactionService.getTransactionDTO(transaction);
+
+        // Invio messaggio di handshake al servizio wallet
+        transactionService.requestTransaction(transactionDTO);
+
+        return transactionService.getTransactionDTO(transaction);
+    }
+
+    @RabbitListener(queues = "${rabbitmq.queue.responseTransaction.name}")
+    public void receiveTransactionResponse(MessageDTO messageDTO) throws CommunicationErrorException {
+
+        if(messageDTO == null){
             throw new CommunicationErrorException();
         }
 
-        if (messageService.isError(response)) {
-            // The sender does not have enough money or the wallet is disabled
+        //Se ritorna != da 200 la transazione non è andata a buon fine e non viene completata
+        //Anche se non completata si salva tutto
+        //ZUCKEMBERGGG
+        if(messageDTO.getCode() == 200){
+            Optional<Transaction> ret = repository.findById(messageDTO.getResponse());
+            if(ret.isEmpty()){
+                throw new CommunicationErrorException();
+            }
+            Transaction transaction = ret.get();
+
+            transaction.setCompleted(true);
+            transaction.setCompletionDate(LocalDateTime.now());
+            repository.save(transaction);
+        }else {
+            Optional<Transaction> ret = repository.findById(messageDTO.getResponse());
+            if(ret.isEmpty()){
+                throw new CommunicationErrorException();
+            }
+            Transaction transaction = ret.get();
             transaction.setCompleted(false);
             transaction.setCompletionDate(LocalDateTime.now());
-            return transaction;
+            repository.save(transaction);
         }
-
-        // Save the transaction to the database
-        //paymentService.saveTransaction(transaction);
-
-        return transaction;
     }
 }
