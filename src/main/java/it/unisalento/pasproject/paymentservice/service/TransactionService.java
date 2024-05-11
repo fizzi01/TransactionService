@@ -1,13 +1,10 @@
 package it.unisalento.pasproject.paymentservice.service;
 
-import it.unisalento.pasproject.paymentservice.business.io.exchanger.MessageExchangeStrategy;
-import it.unisalento.pasproject.paymentservice.business.io.exchanger.MessageExchanger;
 import it.unisalento.pasproject.paymentservice.business.io.producer.MessageProducer;
 import it.unisalento.pasproject.paymentservice.business.io.producer.MessageProducerStrategy;
 import it.unisalento.pasproject.paymentservice.domain.Transaction;
 import it.unisalento.pasproject.paymentservice.dto.MessageDTO;
 import it.unisalento.pasproject.paymentservice.dto.RequestTransactionDTO;
-import it.unisalento.pasproject.paymentservice.dto.TransactionCreationDTO;
 import it.unisalento.pasproject.paymentservice.dto.TransactionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,8 +24,12 @@ public class TransactionService {
     @Value("${rabbitmq.queue.responseTransaction.name}")
     private String responseTransactionQueue;
 
+    @Value("${rabbitmq.routing.notifyTransaction.name}")
+    private String notifyTransactionRoutingKey;
+
     private final MessageProducer messageProducer;
 
+    @Autowired
     public TransactionService (MessageProducer messageProducer,@Qualifier("RabbitMQProducer") MessageProducerStrategy messageProducerStrategy) {
         this.messageProducer = messageProducer;
         messageProducer.setStrategy(messageProducerStrategy);
@@ -45,6 +46,10 @@ public class TransactionService {
 
         //Invia messaggio al wallet
         messageProducer.sendMessage(requestTransactionDTO, transactionExecutionRoutingKey, transactionExchange, responseTransactionQueue);
+    }
+
+    public void notifyTransactionCompleted(TransactionDTO transaction) {
+        messageProducer.sendMessage(transaction, notifyTransactionRoutingKey, transactionExchange);
     }
 
     public TransactionDTO getTransactionDTO(Transaction transaction) {

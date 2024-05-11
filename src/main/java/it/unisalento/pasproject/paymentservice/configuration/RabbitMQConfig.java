@@ -111,6 +111,28 @@ public class RabbitMQConfig {
 
     // ----- END PAYMENT ----- //
 
+    // ----- TRANSACTION REQUEST & NOTIFY ----- //
+
+    @Value("${rabbitmq.queue.receiveTransaction.name}")
+    private String receiveTransactionQueue;
+
+    @Value("${rabbitmq.routing.receiveTransaction.name}")
+    private String receiveTransactionKey;
+
+    @Bean
+    public Queue receiveTransactionQueue() {
+        return new Queue(receiveTransactionQueue);
+    }
+
+    @Bean
+    public Binding receiveTransactionBinding() {
+        return BindingBuilder
+                .bind(receiveTransactionQueue())
+                .to(transactionExchange())
+                .with(receiveTransactionKey);
+    }
+
+    // ----- END TRANSACTION REQUEST & NOTIFY ----- //
 
     /**
      * Creates a message converter for JSON messages.
