@@ -47,6 +47,12 @@ public class CreateTransactionSaga {
         transaction.setDescription(transactionDto.getDescription());
         transaction.setCreationDate(LocalDateTime.now());
 
+        if (transactionDto.getTransactionOwner() == null) {
+            transaction.setTransactionOwner(transaction.getSenderEmail());
+        } else {
+            transaction.setTransactionOwner(transactionDto.getTransactionOwner());
+        }
+
         //Salvo la transazione
         try{
             transaction = repository.save(transaction);

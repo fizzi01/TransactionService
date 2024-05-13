@@ -10,4 +10,5 @@ public class TransactionCreationDTO {
     private String receiverEmail;
     private double amount;
     private String description;
+    private String transactionOwner;
 }

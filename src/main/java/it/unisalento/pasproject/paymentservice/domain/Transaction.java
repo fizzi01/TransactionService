@@ -19,6 +19,8 @@ public class Transaction {
     private String senderEmail;
     private String receiverEmail;
 
+    private String transactionOwner;
+
     private double amount;
 
     private String description;
