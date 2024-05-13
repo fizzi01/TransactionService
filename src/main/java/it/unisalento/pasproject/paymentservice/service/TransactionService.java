@@ -57,6 +57,7 @@ public class TransactionService {
         responseTransaction.setId(transaction.getId());
         responseTransaction.setSenderEmail(transaction.getSenderEmail());
         responseTransaction.setReceiverEmail(transaction.getReceiverEmail());
+        responseTransaction.setTransactionOwner(transaction.getTransactionOwner());
         responseTransaction.setAmount(transaction.getAmount());
         responseTransaction.setDescription(transaction.getDescription());
         responseTransaction.setCreationDate(transaction.getCreationDate());
