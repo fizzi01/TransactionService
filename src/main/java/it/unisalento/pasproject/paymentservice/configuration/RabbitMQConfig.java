@@ -45,41 +45,6 @@ public class RabbitMQConfig {
     // ------  END SECURITY  ------ //
 
 
-
-    @Value("${rabbitmq.routing.userData.key}")
-    private String userDataKey;
-    
-
-    @Value("${rabbitmq.queue.userData.name}")
-    private String userDataQueue;
-
-    @Bean
-    public Queue userDataQueue() {
-        return new Queue(userDataQueue);
-    }
-
-    
-
-    @Value("${rabbitmq.exchange.data.name}")
-    private String dataExchange;
-
-    @Bean
-    public TopicExchange dataExchange() {
-        return new TopicExchange(dataExchange);
-    }
-
-    
-
-    @Bean
-    public Binding userDatadatauserDataBinding() {
-        return BindingBuilder
-                .bind(userDataQueue())
-                .to(dataExchange())
-                .with(userDataKey);
-    }
-
-    // ----- END USER DATA ----- //
-
     // ----- PAYMENT ----- //
 
     @Value("${rabbitmq.exchange.transaction.name}")

@@ -41,8 +41,8 @@ public class TransactionController {
         return listTransactionDTO;
     }
 
-    @GetMapping(value="/find")
-    public TransactionDTO getTransactionById(@RequestParam String id) throws TransactionNotFoundException {
+    @GetMapping(value="/find/{id}")
+    public TransactionDTO getTransactionById(@PathVariable String id) throws TransactionNotFoundException {
         Optional<TransactionDTO> transactionDTO = transactionRepository.findById(id).map(transactionService::getTransactionDTO);
 
         if (transactionDTO.isEmpty()) {
@@ -60,9 +60,9 @@ public class TransactionController {
     }
 
     @GetMapping(value="/find")
-    public ListTransactionDTO getTransactionsByEmail(@RequestParam String email) {
+    public ListTransactionDTO getTransactionsByEmail(@RequestParam String id, @RequestParam String email) {
         ListTransactionDTO listTransactionDTO = new ListTransactionDTO();
-        listTransactionDTO.setTransactions(transactionRepository.findAllBySenderEmailOrReceiverEmail(email, email).stream().map(transactionService::getTransactionDTO).toList());
+        listTransactionDTO.setTransactions(transactionRepository.findAllByIdOrSenderEmailOrReceiverEmail(id,email, email).stream().map(transactionService::getTransactionDTO).toList());
         return listTransactionDTO;
     }
 
