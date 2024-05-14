@@ -1,6 +1,7 @@
 package it.unisalento.pasproject.paymentservice.security;
 
 
+import it.unisalento.pasproject.paymentservice.dto.UserDetailsDTO;
 import it.unisalento.pasproject.paymentservice.service.UserCheckService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

@@ -1,4 +1,4 @@
-package it.unisalento.pasproject.paymentservice.security;
+package it.unisalento.pasproject.paymentservice.dto;
 
 import lombok.Getter;
 import lombok.Setter;
