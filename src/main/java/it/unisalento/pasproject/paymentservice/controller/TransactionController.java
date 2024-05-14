@@ -1,5 +1,6 @@
 package it.unisalento.pasproject.paymentservice.controller;
 
+import it.unisalento.pasproject.paymentservice.domain.Transaction;
 import it.unisalento.pasproject.paymentservice.dto.ListTransactionDTO;
 import it.unisalento.pasproject.paymentservice.dto.TransactionCreationDTO;
 import it.unisalento.pasproject.paymentservice.dto.TransactionDTO;
@@ -43,13 +44,15 @@ public class TransactionController {
 
     @GetMapping(value="/find/{id}")
     public TransactionDTO getTransactionById(@PathVariable String id) throws TransactionNotFoundException {
-        Optional<TransactionDTO> transactionDTO = transactionRepository.findById(id).map(transactionService::getTransactionDTO);
 
-        if (transactionDTO.isEmpty()) {
-            throw new TransactionNotFoundException();
+        Optional<Transaction> transaction = transactionRepository.findById(id);
+
+
+        if (transaction.isEmpty()) {
+            throw new TransactionNotFoundException("Transaction not found with id: " + id);
         }
 
-        return transactionDTO.get();
+        return transactionService.getTransactionDTO(transaction.get());
     }
 
     @GetMapping(value="/find/status")
