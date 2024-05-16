@@ -1,29 +1,30 @@
 services:
 
-  payment-service:
+  transaction-service:
     image: openjdk:22-jdk-oracle
-    container_name: paymentimage
+    container_name: transactionimage
     ports:
       - 8082:8080
       - 8002:8000
     depends_on:
-      - payment-db
+      - transaction-db
     networks:
       - greenspot-net
     volumes:
-      - ./build/libs/PaymentService-v0.0.4.jar:/app/app.jar
+      - ./build/libs/TransactionService-v0.0.4.jar:/app/app.jar
+
     working_dir: /app
     entrypoint: java -Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8000 -jar /app/app.jar
 
-  payment-db:
+  transaction-db:
     image: mongo:latest
-    container_name: paymentdb
+    container_name: transactiondb
     ports:
       - 27017
     volumes:
-      - mongo_payment:/etc/mongo
-      - mongo_payment_data:/data/db
-      - mongo_payment_config:/data/configdb
+      - mongo_transaction:/etc/mongo
+      - mongo_transaction_data:/data/db
+      - mongo_transaction_config:/data/configdb
     networks:
       - greenspot-net
 
@@ -32,6 +33,6 @@ networks:
     name: greenspot_net
 
 volumes:
-  mongo_payment:
-  mongo_payment_data:
-  mongo_payment_config:
+  mongo_transaction:
+  mongo_transaction_data:
+  mongo_transaction_config:
