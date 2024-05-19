@@ -57,7 +57,7 @@ public class CreateTransactionSaga {
         try{
             transaction = repository.save(transaction);
         } catch (Exception e) {
-            throw new DatabaseErrorException();
+            throw new DatabaseErrorException("Database error occurred.");
         }
 
         TransactionDTO transactionDTO = transactionService.getTransactionDTO(transaction);
@@ -72,12 +72,12 @@ public class CreateTransactionSaga {
     public void receiveTransactionResponse(MessageDTO messageDTO) throws CommunicationErrorException {
 
         if(messageDTO == null){
-            throw new CommunicationErrorException();
+            throw new CommunicationErrorException("Communication error occurred.");
         }
 
         Optional<Transaction> ret = repository.findById(messageDTO.getResponse());
         if(ret.isEmpty()){
-            throw new CommunicationErrorException();
+            throw new CommunicationErrorException("Communication error occurred.");
         }
         Transaction transaction = ret.get();
 

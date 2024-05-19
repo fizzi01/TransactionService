@@ -1,5 +1,6 @@
 package it.unisalento.pasproject.transactionservice.configuration;
 
+import it.unisalento.pasproject.transactionservice.security.ExceptionFilter;
 import it.unisalento.pasproject.transactionservice.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,4 +48,8 @@ public class SecurityConfig {
         return new JwtAuthenticationFilter();
     }
 
+    @Bean
+    public ExceptionFilter exceptionFilter() {
+        return new ExceptionFilter();
+    }
 }

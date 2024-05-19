@@ -9,8 +9,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import static it.unisalento.pasproject.transactionservice.security.SecurityConstants.ROLE_ADMIN;
 
 
 @Service
@@ -52,6 +55,24 @@ public class UserCheckService {
 
     public Boolean isEnable(Boolean enable) {
         return enable;
+    }
+
+    /**
+     * Check if the current user is the user with the given email
+     * @param email the email of the user to check
+     * @return true if the current user is the user with the given email, false otherwise
+     */
+    public Boolean isCorrectUser(String email){
+        return email.equals(SecurityContextHolder.getContext().getAuthentication().getName());
+    }
+
+    /**
+     * Check if the current user is an administrator
+     * @return true if the current user is an administrator, false otherwise
+     */
+    public Boolean isAdministrator(){
+        String currentRole = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
+        return currentRole.equalsIgnoreCase(ROLE_ADMIN);
     }
 
 }
