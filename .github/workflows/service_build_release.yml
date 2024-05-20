@@ -117,6 +117,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
+          git pull
           git add build.gradle
           if [ -f docker-compose.yml ]; then
             git add docker-compose.yml
