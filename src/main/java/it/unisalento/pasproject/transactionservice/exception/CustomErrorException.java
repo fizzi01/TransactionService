@@ -9,7 +9,7 @@ import java.util.UUID;
 @Getter
 public abstract class CustomErrorException extends RuntimeException {
 
-    private CustomErrorResponse errorResponse;
+    private final CustomErrorResponse errorResponse;
 
     public CustomErrorException(String message, HttpStatus status) {
         super(message);
