@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import static it.unisalento.pasproject.transactionservice.security.SecurityConst
 @Service
 public class UserCheckService {
 
+
     private final MessageExchanger messageExchanger;
 
     @Value("${rabbitmq.exchange.security.name}")
@@ -27,15 +29,20 @@ public class UserCheckService {
     @Value("${rabbitmq.routing.security.key}")
     private String securityRequestRoutingKey;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserCheckService.class);
-
     @Autowired
-    public UserCheckService(MessageExchanger messageExchanger,@Qualifier("RabbitMQExchange") MessageExchangeStrategy messageExchangeStrategy) {
+    public UserCheckService(MessageExchanger messageExchanger, @Qualifier("RabbitMQExchange") MessageExchangeStrategy messageExchangeStrategy) {
         this.messageExchanger = messageExchanger;
-        messageExchanger.setStrategy(messageExchangeStrategy);
+        this.messageExchanger.setStrategy(messageExchangeStrategy);
     }
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserCheckService.class);
 
+    /**
+     * Load the user details by email
+     * @param email the email of the user
+     * @return the user details
+     * @throws UsernameNotFoundException if the user is not found
+     */
     public UserDetailsDTO loadUserByUsername(String email) throws UsernameNotFoundException {
 
         //Chiamata MQTT a CQRS per ottenere i dettagli dell'utente
@@ -45,10 +52,6 @@ public class UserCheckService {
             user = messageExchanger.exchangeMessage(email,securityRequestRoutingKey,securityExchange,UserDetailsDTO.class);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-        }
-
-        if(user != null) {
-            LOGGER.info(String.format("User %s found with role: %s and enabled %s", user.getEmail(), user.getRole(), user.getEnabled()));
         }
 
         return user;
@@ -66,6 +69,14 @@ public class UserCheckService {
      */
     public Boolean isCorrectUser(String email){
         return email.equals(SecurityContextHolder.getContext().getAuthentication().getName());
+    }
+
+    /**
+     * Get the email of the current user
+     * @return the email of the current user
+     */
+    public String getCurrentUserEmail(){
+        return ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
     }
 
     /**
