@@ -7,6 +7,8 @@ import it.unisalento.pasproject.transactionservice.dto.TransactionDTO;
 import it.unisalento.pasproject.transactionservice.exception.CommunicationErrorException;
 import it.unisalento.pasproject.transactionservice.exception.DatabaseErrorException;
 import it.unisalento.pasproject.transactionservice.repositories.TransactionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,8 @@ public class CreateTransactionSaga {
     private final TransactionService transactionService;
     private final TransactionRepository repository;
     private final MessageService messageService;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CreateTransactionSaga.class);
 
     @Autowired
     public CreateTransactionSaga(TransactionService transactionService, TransactionRepository repository, MessageService messageService) {
@@ -74,6 +78,8 @@ public class CreateTransactionSaga {
         if(messageDTO == null){
             throw new CommunicationErrorException("Communication error occurred.");
         }
+
+        LOGGER.info("Received response for transaction: " + messageDTO.getResponse() + " with code: " + messageDTO.getCode());
 
         Optional<Transaction> ret = repository.findById(messageDTO.getResponse());
         if(ret.isEmpty()){

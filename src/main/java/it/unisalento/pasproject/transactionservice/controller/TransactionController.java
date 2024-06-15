@@ -6,6 +6,7 @@ import it.unisalento.pasproject.transactionservice.dto.TransactionCreationDTO;
 import it.unisalento.pasproject.transactionservice.dto.TransactionDTO;
 import it.unisalento.pasproject.transactionservice.exception.DatabaseErrorException;
 import it.unisalento.pasproject.transactionservice.exception.TransactionNotFoundException;
+import it.unisalento.pasproject.transactionservice.exception.UserNotAuthorizedException;
 import it.unisalento.pasproject.transactionservice.repositories.TransactionRepository;
 import it.unisalento.pasproject.transactionservice.service.CreateTransactionSaga;
 import it.unisalento.pasproject.transactionservice.service.TransactionService;
@@ -38,6 +39,10 @@ public class TransactionController {
 
     @PostMapping(value="/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public TransactionDTO createTransaction(@RequestBody TransactionCreationDTO transactionCreationDTO) throws DatabaseErrorException {
+        //Controlla che l'utente sia autorizzato a creare la transazione, ovvero se è il sender corrisponde all'utente loggato
+        if(!userCheckService.isCorrectUser(transactionCreationDTO.getSenderEmail())){
+            throw new UserNotAuthorizedException("User not authorized to create transaction.");
+        }
         return createTransactionSaga.createTransaction(transactionCreationDTO);
     }
 
@@ -82,12 +87,12 @@ public class TransactionController {
     }
 
     @GetMapping(value="/find")
-    public ListTransactionDTO getTransactionsByEmail(@RequestParam String id, @RequestParam String email) {
+    public ListTransactionDTO getTransactionsByEmail(@RequestParam(required = false) String id, @RequestParam String email) {
 
         //Controlla che l'utente sia autorizzato a visualizzare la transazione, ovvero se è il receiver o il sender corrisponde all'utente loggato
         //se ADMIN può vedere tutte le transazioni
         if(!userCheckService.isCorrectUser(email) && !userCheckService.isAdministrator()){
-            throw new TransactionNotFoundException("Transactions not found with id: " + id);
+            throw new TransactionNotFoundException("Transactions not found");
         }
 
         ListTransactionDTO listTransactionDTO = new ListTransactionDTO();
