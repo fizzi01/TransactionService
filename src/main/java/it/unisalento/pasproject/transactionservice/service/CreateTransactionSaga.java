@@ -61,12 +61,15 @@ public class CreateTransactionSaga {
         try{
             transaction = repository.save(transaction);
         } catch (Exception e) {
-            throw new DatabaseErrorException("Database error occurred.");
+            LOGGER.error("Database error occurred.");
         }
+
+        LOGGER.info("Transaction created with id: " + transaction.getId());
 
         TransactionDTO transactionDTO = transactionService.getTransactionDTO(transaction);
 
         // Invio messaggio di handshake al servizio wallet
+        LOGGER.info("Sending transaction {} request to wallet service.", transaction.getId());
         transactionService.requestTransaction(transactionDTO);
 
         return transactionService.getTransactionDTO(transaction);
@@ -74,36 +77,44 @@ public class CreateTransactionSaga {
 
     @RabbitListener(queues = "${rabbitmq.queue.responseTransaction.name}")
     public void receiveTransactionResponse(MessageDTO messageDTO) throws CommunicationErrorException {
+        try {
+            if (messageDTO == null) {
+                LOGGER.error("Communication error occurred.");
+            }
 
-        if(messageDTO == null){
-            throw new CommunicationErrorException("Communication error occurred.");
+            LOGGER.info("Received response for transaction: " + messageDTO.getResponse() + " with code: " + messageDTO.getCode());
+
+            Optional<Transaction> ret = repository.findById(messageDTO.getResponse());
+            if (ret.isEmpty()) {
+                throw new CommunicationErrorException("Communication error occurred.");
+            }
+            Transaction transaction = ret.get();
+
+            //Se ritorna != da 200 la transazione non è andata a buon fine e non viene completata
+            //Anche se non completata si salva tutto
+            //ZUCKEMBERGGG
+            transaction.setCompleted(messageDTO.getCode() == 200);
+
+            transaction.setCompletionDate(LocalDateTime.now());
+            repository.save(transaction);
+
+            // Notifico della chiusura della transazione sul canale di notifica (esito positivo o negativo)
+            transactionService.notifyTransactionCompleted(transactionService.getTransactionDTO(transaction));
         }
-
-        LOGGER.info("Received response for transaction: " + messageDTO.getResponse() + " with code: " + messageDTO.getCode());
-
-        Optional<Transaction> ret = repository.findById(messageDTO.getResponse());
-        if(ret.isEmpty()){
-            throw new CommunicationErrorException("Communication error occurred.");
+        catch (Exception e) {
+            LOGGER.error("Transaction response error.");
         }
-        Transaction transaction = ret.get();
-
-        //Se ritorna != da 200 la transazione non è andata a buon fine e non viene completata
-        //Anche se non completata si salva tutto
-        //ZUCKEMBERGGG
-        transaction.setCompleted(messageDTO.getCode() == 200);
-
-        transaction.setCompletionDate(LocalDateTime.now());
-        repository.save(transaction);
-
-        // Notifico della chiusura della transazione sul canale di notifica (esito positivo o negativo)
-        transactionService.notifyTransactionCompleted(transactionService.getTransactionDTO(transaction));
-
 
     }
 
     @RabbitListener(queues = "${rabbitmq.queue.receiveTransaction.name}")
     public void receiveTransactionRequest(TransactionCreationDTO transactionCreationDTO) throws DatabaseErrorException {
-        createTransaction(transactionCreationDTO);
+        LOGGER.info("Received transaction request from service.");
+        try{
+            createTransaction(transactionCreationDTO);
+        } catch (Exception e) {
+            LOGGER.error("Transaction creation error.");
+        }
     }
 
 
