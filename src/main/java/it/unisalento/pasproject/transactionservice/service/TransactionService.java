@@ -86,7 +86,11 @@ public class TransactionService {
             invoiceItemDTO.setAmount(transaction.getAmount());
 
             invoiceItemDTOList.add(invoiceItemDTO);
+
+            LOGGER.info("InvoiceItemDTO: {}", invoiceItemDTO.getSenderEmail());
         }
+
+        LOGGER.info("InvoiceItemListDTO: {}", invoiceItemListDTO.getInvoiceItemDTOS().size());
 
         return invoiceItemListDTO;
     }
@@ -98,7 +102,7 @@ public class TransactionService {
             LOGGER.info("Received message: {}", transactionRequestMessageDTO.getFrom());
             LOGGER.info("Received message: {}", transactionRequestMessageDTO.getTo());
 
-            List<Transaction> transactions = transactionRepository.findAllBySenderEmailAndCompletionDateBetweenAndIsCompleted(
+            List<Transaction> transactions = transactionRepository.findAllBySenderEmailAndCompletionDateBetweenAndCompleted(
                     transactionRequestMessageDTO.getUserEmail(),
                     transactionRequestMessageDTO.getFrom(),
                     transactionRequestMessageDTO.getTo(),
