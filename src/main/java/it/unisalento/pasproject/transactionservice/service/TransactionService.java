@@ -106,6 +106,8 @@ public class TransactionService {
             );
 
             LOGGER.info("Received transactions: {}", transactions.size());
+            LOGGER.info("Received transactions: {}, {}, {}, {}, {}, {}, {}", transactions.getFirst().getSenderEmail(), transactions.getFirst().getReceiverEmail(), transactions.getFirst().getAmount(), transactions.getFirst().getDescription(), transactions.getFirst().getCreationDate(), transactions.getFirst().getCompletionDate(), transactions.getFirst().isCompleted());
+            LOGGER.info("Received transactions: {}", transactions.getLast());
 
             if (transactions.isEmpty()) {
                 return null;
