@@ -1,5 +1,6 @@
 package it.unisalento.pasproject.transactionservice.controller;
 
+import it.unisalento.pasproject.transactionservice.dto.MemberAnalyticsDTO;
 import it.unisalento.pasproject.transactionservice.dto.UserAnalyticsDTO;
 import it.unisalento.pasproject.transactionservice.exception.MissingDataException;
 import it.unisalento.pasproject.transactionservice.service.AnalyticsService;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static it.unisalento.pasproject.transactionservice.security.SecurityConstants.ROLE_MEMBRO;
 import static it.unisalento.pasproject.transactionservice.security.SecurityConstants.ROLE_UTENTE;
 
 @RestController
@@ -37,6 +39,20 @@ public class AnalyticsController {
 
         try {
             return analyticsService.getUserAnalytics(senderEmail, startDate, endDate, granularity);
+        } catch (Exception e) {
+            throw new MissingDataException(e.getMessage());
+        }
+    }
+
+    @GetMapping("/member")
+    @Secured(ROLE_MEMBRO)
+    public List<MemberAnalyticsDTO> getMemberAnalytics(@RequestParam String granularity) {
+        String receiverEmail = userCheckService.getCurrentUserEmail();
+        LocalDateTime startDate = LocalDateTime.now().withDayOfYear(1).toLocalDate().atStartOfDay();
+        LocalDateTime endDate = LocalDateTime.now();
+
+        try {
+            return analyticsService.getMemberAnalytics(receiverEmail, startDate, endDate, granularity);
         } catch (Exception e) {
             throw new MissingDataException(e.getMessage());
         }
