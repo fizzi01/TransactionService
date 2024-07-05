@@ -94,23 +94,29 @@ public class TransactionService {
     //TODO: Implement this method
     @RabbitListener(queues = "${rabbitmq.queue.requestTransaction.name}")
     public InvoiceItemListDTO getInvoiceTransaction(TransactionRequestMessageDTO transactionRequestMessageDTO) {
-        LOGGER.info("Received message: {}", transactionRequestMessageDTO.getFrom());
-        LOGGER.info("Received message: {}", transactionRequestMessageDTO.getTo());
+        try {
+            LOGGER.info("Received message: {}", transactionRequestMessageDTO.getFrom());
+            LOGGER.info("Received message: {}", transactionRequestMessageDTO.getTo());
 
-        List<Transaction> transactions = transactionRepository.findBySenderEmailAndCompletionDateBetweenAndCompleted(
-                transactionRequestMessageDTO.getUserEmail(),
-                transactionRequestMessageDTO.getFrom(),
-                transactionRequestMessageDTO.getTo(),
-                true
-        );
+            List<Transaction> transactions = transactionRepository.findBySenderEmailAndCompletionDateBetweenAndCompleted(
+                    transactionRequestMessageDTO.getUserEmail(),
+                    transactionRequestMessageDTO.getFrom(),
+                    transactionRequestMessageDTO.getTo(),
+                    true
+            );
 
-        LOGGER.info("Received transactions: {}", transactions.size());
+            LOGGER.info("Received transactions: {}", transactions.size());
 
-        if (!transactions.isEmpty()){
-            return getInvoiceItemListDTO(transactions);
+            if (!transactions.isEmpty()) {
+                return getInvoiceItemListDTO(transactions);
+            }
+
+            return null;
+
+        } catch (Exception e) {
+            LOGGER.error("Error: {}", e.getMessage());
+            return null;
         }
-
-        return null;
     }
 
 }
