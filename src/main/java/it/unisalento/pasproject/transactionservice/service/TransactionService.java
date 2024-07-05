@@ -85,32 +85,20 @@ public class TransactionService {
             invoiceItemDTO.setAmount(transaction.getAmount());
 
             invoiceItemDTOList.add(invoiceItemDTO);
-
-            LOGGER.info("InvoiceItemDTO: {}", invoiceItemDTO.getSenderEmail());
         }
-
-        LOGGER.info("InvoiceItemListDTO: {}", invoiceItemListDTO.getItems().size());
 
         return invoiceItemListDTO;
     }
 
-    //TODO: Implement this method
     @RabbitListener(queues = "${rabbitmq.queue.requestTransaction.name}")
     public InvoiceItemListDTO getInvoiceTransaction(TransactionRequestMessageDTO transactionRequestMessageDTO) {
         try {
-            LOGGER.info("Received message: {}", transactionRequestMessageDTO.getFrom());
-            LOGGER.info("Received message: {}", transactionRequestMessageDTO.getTo());
-
             List<Transaction> transactions = transactionRepository.findAllBySenderEmailAndCompletionDateBetweenAndIsCompleted(
                     transactionRequestMessageDTO.getUserEmail(),
                     transactionRequestMessageDTO.getFrom(),
                     transactionRequestMessageDTO.getTo(),
                     true
             );
-
-            LOGGER.info("Received transactions: {}", transactions.size());
-            LOGGER.info("Received transactions: {}, {}, {}, {}, {}, {}, {}", transactions.getFirst().getSenderEmail(), transactions.getFirst().getReceiverEmail(), transactions.getFirst().getAmount(), transactions.getFirst().getDescription(), transactions.getFirst().getCreationDate(), transactions.getFirst().getCompletionDate(), transactions.getFirst().isCompleted());
-            LOGGER.info("Received transactions: {}", transactions.getLast());
 
             if (transactions.isEmpty()) {
                 return null;
