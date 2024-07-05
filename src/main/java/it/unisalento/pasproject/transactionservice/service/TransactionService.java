@@ -5,6 +5,8 @@ import it.unisalento.pasproject.transactionservice.business.io.producer.MessageP
 import it.unisalento.pasproject.transactionservice.domain.Transaction;
 import it.unisalento.pasproject.transactionservice.dto.*;
 import it.unisalento.pasproject.transactionservice.repositories.TransactionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,6 +32,8 @@ public class TransactionService {
     private String notifyTransactionRoutingKey;
 
     private final MessageProducer messageProducer;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionService.class);
 
     @Autowired
     public TransactionService (MessageProducer messageProducer, @Qualifier("RabbitMQProducer") MessageProducerStrategy messageProducerStrategy, TransactionRepository transactionRepository) {
@@ -87,11 +91,16 @@ public class TransactionService {
     //TODO: Implement this method
     @RabbitListener(queues = "${rabbitmq.queue.requestTransaction.name}")
     public InvoiceItemListDTO getInvoiceTransaction(TransactionRequestMessageDTO transactionRequestMessageDTO) {
-        List<Transaction> transactions = transactionRepository.findBySenderEmailAndCompletionDateAfterAndCompletionDateBefore(
+        LOGGER.info("Received message: {}", transactionRequestMessageDTO.getFrom());
+        LOGGER.info("Received message: {}", transactionRequestMessageDTO.getTo());
+
+        List<Transaction> transactions = transactionRepository.findBySenderEmailAndCompletionDateBetween(
                 transactionRequestMessageDTO.getUserEmail(),
                 transactionRequestMessageDTO.getFrom(),
                 transactionRequestMessageDTO.getTo()
         );
+
+        LOGGER.info("Received transactions: {}", transactions.size());
 
         if (!transactions.isEmpty()){
             return getInvoiceItemListDTO(transactions);

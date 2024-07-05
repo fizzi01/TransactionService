@@ -14,5 +14,5 @@ public interface TransactionRepository extends MongoRepository<Transaction, Stri
     List<Transaction> findAllBySenderEmailAndReceiverEmail(String senderEmail, String receiverEmail);
     List<Transaction> findAllByIdOrSenderEmailOrReceiverEmail(String id, String senderEmail, String receiverEmail);
     List<Transaction> findAllByCompleted(boolean isCompleted);
-    List<Transaction> findBySenderEmailAndCompletionDateAfterAndCompletionDateBefore(String senderEmail, LocalDateTime from, LocalDateTime to);
+    List<Transaction> findBySenderEmailAndCompletionDateBetween(String senderEmail, LocalDateTime from, LocalDateTime to);
 }
