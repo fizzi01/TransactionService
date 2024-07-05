@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserDTO {
+public class UserAnalyticsDTO {
     private String senderEmail;
     private int day;
     private int month;

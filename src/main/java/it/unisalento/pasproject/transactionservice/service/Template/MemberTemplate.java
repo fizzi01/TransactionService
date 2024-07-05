@@ -1,9 +1,7 @@
 package it.unisalento.pasproject.transactionservice.service.Template;
 
 import it.unisalento.pasproject.transactionservice.domain.Transaction;
-import it.unisalento.pasproject.transactionservice.dto.UserAnalyticsDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import it.unisalento.pasproject.transactionservice.dto.MemberAnalyticsDTO;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.*;
@@ -12,15 +10,13 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class UserTemplate extends AnalyticsTemplate<UserAnalyticsDTO> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserTemplate.class);
-
-    public UserTemplate(MongoTemplate mongoTemplate) {
+public class MemberTemplate extends AnalyticsTemplate<MemberAnalyticsDTO> {
+    public MemberTemplate(MongoTemplate mongoTemplate) {
         super(mongoTemplate);
     }
 
     @Override
-    public List<UserAnalyticsDTO> getAnalyticsList(String email, LocalDateTime startDate, LocalDateTime endDate, String granularity) {
+    public List<MemberAnalyticsDTO> getAnalyticsList(String email, LocalDateTime startDate, LocalDateTime endDate, String granularity) {
         return super.getAnalyticsList(email, startDate, endDate, granularity);
     }
 
@@ -30,25 +26,25 @@ public class UserTemplate extends AnalyticsTemplate<UserAnalyticsDTO> {
 
         if (startDate != null && endDate != null) {
             matchOperation = Aggregation.match(
-                    Criteria.where("senderEmail").is(email)
+                    Criteria.where("receiverEmail").is(email)
                             .andOperator(Criteria.where("completionDate").gte(startDate).lte(endDate))
                             .and("isCompleted").is(true)
             );
         } else if (startDate != null) {
             matchOperation = Aggregation.match(
-                    Criteria.where("senderEmail").is(email)
+                    Criteria.where("receiverEmail").is(email)
                             .and("creationDate").gte(startDate)
                             .and("isCompleted").is(true)
             );
         } else if (endDate != null) {
             matchOperation = Aggregation.match(
-                    Criteria.where("senderEmail").is(email)
+                    Criteria.where("receiverEmail").is(email)
                             .and("creationDate").lte(endDate)
                             .and("isCompleted").is(true)
             );
         } else {
             matchOperation = Aggregation.match(
-                    Criteria.where("senderEmail").is(email)
+                    Criteria.where("receiverEmail").is(email)
                             .and("isCompleted").is(true)
             );
         }
@@ -65,7 +61,7 @@ public class UserTemplate extends AnalyticsTemplate<UserAnalyticsDTO> {
     protected ProjectionOperation createProjectionOperation() {
         return Aggregation.project()
                 .andInclude(
-                        "senderEmail",
+                        "receiverEmail",
                         "amount",
                         "completionDate",
                         "isCompleted"
@@ -78,19 +74,19 @@ public class UserTemplate extends AnalyticsTemplate<UserAnalyticsDTO> {
     @Override
     protected GroupOperation createGroupOperation(String granularity) {
         return switch (granularity) {
-            case "day" -> Aggregation.group("senderEmail", "year", "month", "day")
+            case "day" -> Aggregation.group("receiverEmail", "year", "month", "day")
                     .sum("amount").as("totalAmount")
                     .count().as("totalTransactions")
                     .avg("amount").as("averageAmount")
                     .max("amount").as("maxAmount")
                     .min("amount").as("minAmount");
-            case "month" -> Aggregation.group("senderEmail", "year", "month")
+            case "month" -> Aggregation.group("receiverEmail", "year", "month")
                     .sum("amount").as("totalAmount")
                     .count().as("totalTransactions")
                     .avg("amount").as("averageAmount")
                     .max("amount").as("maxAmount")
                     .min("amount").as("minAmount");
-            case "year" -> Aggregation.group("senderEmail", "year")
+            case "year" -> Aggregation.group("receiverEmail", "year")
                     .sum("amount").as("totalAmount")
                     .count().as("totalTransactions")
                     .avg("amount").as("averageAmount")
@@ -103,7 +99,7 @@ public class UserTemplate extends AnalyticsTemplate<UserAnalyticsDTO> {
     @Override
     protected ProjectionOperation createFinalProjection(String granularity) {
         ProjectionOperation projectionOperation = Aggregation.project()
-                .andExpression("senderEmail").as("senderEmail")
+                .andExpression("receiverEmail").as("receiverEmail")
                 .andExpression("totalAmount").as("totalAmount")
                 .andExpression("totalTransactions").as("totalTransactions")
                 .andExpression("totalAmount / totalTransactions").as("amountPerTransaction")
@@ -143,8 +139,7 @@ public class UserTemplate extends AnalyticsTemplate<UserAnalyticsDTO> {
     }
 
     @Override
-    protected Class<UserAnalyticsDTO> getDTOClass() {
-        return UserAnalyticsDTO.class;
+    protected Class<MemberAnalyticsDTO> getDTOClass() {
+        return MemberAnalyticsDTO.class;
     }
 }
-

@@ -1,6 +1,6 @@
 package it.unisalento.pasproject.transactionservice.controller;
 
-import it.unisalento.pasproject.transactionservice.dto.UserDTO;
+import it.unisalento.pasproject.transactionservice.dto.UserAnalyticsDTO;
 import it.unisalento.pasproject.transactionservice.exception.MissingDataException;
 import it.unisalento.pasproject.transactionservice.service.AnalyticsService;
 import it.unisalento.pasproject.transactionservice.service.UserCheckService;
@@ -30,7 +30,7 @@ public class AnalyticsController {
 
     @GetMapping("/user")
     @Secured(ROLE_UTENTE)
-    public List<UserDTO> getUserAnalytics(@RequestParam String granularity) {
+    public List<UserAnalyticsDTO> getUserAnalytics(@RequestParam String granularity) {
         String senderEmail = userCheckService.getCurrentUserEmail();
         LocalDateTime startDate = LocalDateTime.now().withDayOfYear(1).toLocalDate().atStartOfDay();
         LocalDateTime endDate = LocalDateTime.now();
