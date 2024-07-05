@@ -98,20 +98,19 @@ public class TransactionService {
             LOGGER.info("Received message: {}", transactionRequestMessageDTO.getFrom());
             LOGGER.info("Received message: {}", transactionRequestMessageDTO.getTo());
 
-            List<Transaction> transactions = transactionRepository.findBySenderEmailAndCompletionDateBetweenAndCompleted(
+            List<Transaction> transactions = transactionRepository.findBySenderEmailAndCompletionDateBetweenAndCompletedIsTrue(
                     transactionRequestMessageDTO.getUserEmail(),
                     transactionRequestMessageDTO.getFrom(),
-                    transactionRequestMessageDTO.getTo(),
-                    true
+                    transactionRequestMessageDTO.getTo()
             );
 
             LOGGER.info("Received transactions: {}", transactions.size());
 
-            if (!transactions.isEmpty()) {
-                return getInvoiceItemListDTO(transactions);
+            if (transactions.isEmpty()) {
+                return null;
             }
 
-            return null;
+            return getInvoiceItemListDTO(transactions);
 
         } catch (Exception e) {
             LOGGER.error("Error: {}", e.getMessage());
