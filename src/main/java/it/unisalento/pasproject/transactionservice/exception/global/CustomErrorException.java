@@ -1,4 +1,4 @@
-package it.unisalento.pasproject.transactionservice.exception;
+package it.unisalento.pasproject.transactionservice.exception.global;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

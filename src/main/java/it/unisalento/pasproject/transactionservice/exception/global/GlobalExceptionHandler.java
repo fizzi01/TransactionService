@@ -1,4 +1,4 @@
-package it.unisalento.pasproject.transactionservice.exception;
+package it.unisalento.pasproject.transactionservice.exception.global;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;

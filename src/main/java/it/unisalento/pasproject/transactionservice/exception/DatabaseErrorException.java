@@ -1,7 +1,7 @@
 package it.unisalento.pasproject.transactionservice.exception;
 
+import it.unisalento.pasproject.transactionservice.exception.global.CustomErrorException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 public class DatabaseErrorException extends CustomErrorException {
     public DatabaseErrorException(String message) {
