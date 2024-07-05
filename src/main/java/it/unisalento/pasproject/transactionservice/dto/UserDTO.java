@@ -5,8 +5,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserYearlyDTO {
+public class UserDTO {
     private String senderEmail;
+    private int day;
     private int month;
     private int year;
     private float totalAmount;

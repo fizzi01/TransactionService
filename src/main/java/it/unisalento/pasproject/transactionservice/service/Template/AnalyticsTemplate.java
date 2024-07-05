@@ -20,17 +20,15 @@ public abstract class AnalyticsTemplate<T> {
         this.mongoTemplate = mongoTemplate;
     }
 
-    public List<T> getAnalyticsList(String email, LocalDateTime startDate, LocalDateTime endDate) {
+    public List<T> getAnalyticsList(String email, LocalDateTime startDate, LocalDateTime endDate, String granularity) {
         MatchOperation matchOperation = createMatchOperation(email, startDate, endDate);
         List<AggregationOperation> operations = new ArrayList<>();
         operations.add(matchOperation);
         operations.addAll(getAdditionalOperations());
         operations.add(createProjectionOperation());
-        operations.add(createGroupOperation());
-        operations.add(createFinalProjection());
-        operations.add(createSortOperation());
-
-
+        operations.add(createGroupOperation(granularity));
+        operations.add(createFinalProjection(granularity));
+        operations.add(createSortOperation(granularity));
 
         Aggregation aggregation = Aggregation.newAggregation(operations);
         logger.error("Aggregation: {}", aggregation);
@@ -39,14 +37,14 @@ public abstract class AnalyticsTemplate<T> {
         return results.getMappedResults();
     }
 
-    public Optional<T> getAnalytics(String email, LocalDateTime startDate, LocalDateTime endDate) {
+    public Optional<T> getAnalytics(String email, LocalDateTime startDate, LocalDateTime endDate, String granularity) {
         MatchOperation matchOperation = createMatchOperation(email, startDate, endDate);
         List<AggregationOperation> operations = new ArrayList<>();
         operations.add(matchOperation);
         operations.addAll(getAdditionalOperations());
         operations.add(createProjectionOperation());
-        operations.add(createGroupOperation());
-        operations.add(createFinalProjection());
+        operations.add(createGroupOperation(granularity));
+        operations.add(createFinalProjection(granularity));
 
         Aggregation aggregation = Aggregation.newAggregation(operations);
         AggregationResults<T> results = mongoTemplate.aggregate(aggregation, getCollectionName(), getDTOClass());
@@ -60,11 +58,11 @@ public abstract class AnalyticsTemplate<T> {
 
     protected abstract ProjectionOperation createProjectionOperation();
 
-    protected abstract GroupOperation createGroupOperation();
+    protected abstract GroupOperation createGroupOperation(String granularity);
 
-    protected abstract ProjectionOperation createFinalProjection();
+    protected abstract ProjectionOperation createFinalProjection(String granularity);
 
-    protected abstract SortOperation createSortOperation();
+    protected abstract SortOperation createSortOperation(String granularity);
 
     protected abstract String getCollectionName();
 
