@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -75,6 +76,8 @@ public class TransactionService {
 
     public InvoiceItemListDTO getInvoiceItemListDTO(List<Transaction> transactions) {
         InvoiceItemListDTO invoiceItemListDTO = new InvoiceItemListDTO();
+        List<InvoiceItemDTO> invoiceItemDTOList = new ArrayList<>();
+        invoiceItemListDTO.setInvoiceItemDTOS(invoiceItemDTOList);
 
         for (Transaction transaction : transactions) {
             InvoiceItemDTO invoiceItemDTO = new InvoiceItemDTO();
@@ -82,7 +85,7 @@ public class TransactionService {
             invoiceItemDTO.setDescription(transaction.getDescription());
             invoiceItemDTO.setAmount(transaction.getAmount());
 
-            invoiceItemListDTO.getInvoiceItemDTOS().add(invoiceItemDTO);
+            invoiceItemDTOList.add(invoiceItemDTO);
         }
 
         return invoiceItemListDTO;
