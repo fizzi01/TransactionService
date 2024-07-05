@@ -102,7 +102,7 @@ public class TransactionService {
             LOGGER.info("Received message: {}", transactionRequestMessageDTO.getFrom());
             LOGGER.info("Received message: {}", transactionRequestMessageDTO.getTo());
 
-            List<Transaction> transactions = transactionRepository.findAllBySenderEmailAndCompletionDateBetweenAndCompleted(
+            List<Transaction> transactions = transactionRepository.findAllBySenderEmailAndCompletionDateBetweenAndIsCompleted(
                     transactionRequestMessageDTO.getUserEmail(),
                     transactionRequestMessageDTO.getFrom(),
                     transactionRequestMessageDTO.getTo(),
