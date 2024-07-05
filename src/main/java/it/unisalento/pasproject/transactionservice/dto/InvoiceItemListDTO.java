@@ -9,9 +9,9 @@ import java.util.List;
 @Getter
 @Setter
 public class InvoiceItemListDTO {
-    List<InvoiceItemDTO> invoiceItemDTOS;
+    List<InvoiceItemDTO> items;
 
     public InvoiceItemListDTO() {
-        this.invoiceItemDTOS = new ArrayList<>();
+        this.items = new ArrayList<>();
     }
 }

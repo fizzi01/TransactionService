@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TransactionService {
@@ -77,7 +76,7 @@ public class TransactionService {
     public InvoiceItemListDTO getInvoiceItemListDTO(List<Transaction> transactions) {
         InvoiceItemListDTO invoiceItemListDTO = new InvoiceItemListDTO();
         List<InvoiceItemDTO> invoiceItemDTOList = new ArrayList<>();
-        invoiceItemListDTO.setInvoiceItemDTOS(invoiceItemDTOList);
+        invoiceItemListDTO.setItems(invoiceItemDTOList);
 
         for (Transaction transaction : transactions) {
             InvoiceItemDTO invoiceItemDTO = new InvoiceItemDTO();
@@ -90,7 +89,7 @@ public class TransactionService {
             LOGGER.info("InvoiceItemDTO: {}", invoiceItemDTO.getSenderEmail());
         }
 
-        LOGGER.info("InvoiceItemListDTO: {}", invoiceItemListDTO.getInvoiceItemDTOS().size());
+        LOGGER.info("InvoiceItemListDTO: {}", invoiceItemListDTO.getItems().size());
 
         return invoiceItemListDTO;
     }
