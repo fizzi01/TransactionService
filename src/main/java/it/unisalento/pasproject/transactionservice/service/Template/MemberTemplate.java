@@ -66,9 +66,9 @@ public class MemberTemplate extends AnalyticsTemplate<MemberAnalyticsDTO> {
                         "completionDate",
                         "isCompleted"
                 )
-                .and(DateOperators.dateOf("completionDate").withTimezone(DateOperators.Timezone.valueOf("UTC")).toString("%d")).as("day")
-                .and(DateOperators.dateOf("completionDate").withTimezone(DateOperators.Timezone.valueOf("UTC")).toString("%m")).as("month")
-                .and(DateOperators.dateOf("completionDate").withTimezone(DateOperators.Timezone.valueOf("UTC")).toString("%Y")).as("year");
+                .and(ConvertOperators.ToInt.toInt(DateOperators.dateOf("completionDate").withTimezone(DateOperators.Timezone.valueOf("UTC")).toString("%d"))).as("day")
+                .and(ConvertOperators.ToInt.toInt(DateOperators.dateOf("completionDate").withTimezone(DateOperators.Timezone.valueOf("UTC")).toString("%m"))).as("month")
+                .and(ConvertOperators.ToInt.toInt(DateOperators.dateOf("completionDate").withTimezone(DateOperators.Timezone.valueOf("UTC")).toString("%Y"))).as("year");
     }
 
     @Override

@@ -2,6 +2,7 @@ package it.unisalento.pasproject.transactionservice.controller;
 
 import it.unisalento.pasproject.transactionservice.dto.MemberAnalyticsDTO;
 import it.unisalento.pasproject.transactionservice.dto.UserAnalyticsDTO;
+import it.unisalento.pasproject.transactionservice.exception.BadFormatRequestException;
 import it.unisalento.pasproject.transactionservice.exception.MissingDataException;
 import it.unisalento.pasproject.transactionservice.service.AnalyticsService;
 import it.unisalento.pasproject.transactionservice.service.UserCheckService;
@@ -32,9 +33,13 @@ public class AnalyticsController {
 
     @GetMapping("/user")
     @Secured(ROLE_UTENTE)
-    public List<UserAnalyticsDTO> getUserAnalytics(@RequestParam String granularity) {
+    public List<UserAnalyticsDTO> getUserAnalytics(@RequestParam int month, @RequestParam int year, @RequestParam String granularity) {
+        if(month < 1 || month > 12 || year < 0 || year > LocalDateTime.now().getYear()) {
+            throw new BadFormatRequestException("Wrong request format. Please provide a valid month and year");
+        }
+
         String senderEmail = userCheckService.getCurrentUserEmail();
-        LocalDateTime startDate = LocalDateTime.now().withDayOfYear(1).toLocalDate().atStartOfDay();
+        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
         LocalDateTime endDate = LocalDateTime.now();
 
         try {
@@ -46,9 +51,13 @@ public class AnalyticsController {
 
     @GetMapping("/member")
     @Secured(ROLE_MEMBRO)
-    public List<MemberAnalyticsDTO> getMemberAnalytics(@RequestParam String granularity) {
+    public List<MemberAnalyticsDTO> getMemberAnalytics(@RequestParam int month, @RequestParam int year, @RequestParam String granularity) {
+        if(month < 1 || month > 12 || year < 0 || year > LocalDateTime.now().getYear()) {
+            throw new BadFormatRequestException("Wrong request format. Please provide a valid month and year");
+        }
+
         String receiverEmail = userCheckService.getCurrentUserEmail();
-        LocalDateTime startDate = LocalDateTime.now().withDayOfYear(1).toLocalDate().atStartOfDay();
+        LocalDateTime startDate = LocalDateTime.of(year, month, 1, 0, 0);
         LocalDateTime endDate = LocalDateTime.now();
 
         try {
