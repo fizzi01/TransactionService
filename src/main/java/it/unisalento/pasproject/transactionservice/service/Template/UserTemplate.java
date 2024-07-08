@@ -113,14 +113,14 @@ public class UserTemplate extends AnalyticsTemplate<UserAnalyticsDTO> {
 
         projectionOperation = switch (granularity) {
             case "day" -> projectionOperation
-                    .andExpression("toInt(day)").as("day")
-                    .andExpression("toInt(month)").as("month")
-                    .andExpression("toInt(year)").as("year");
+                    .andExpression("day").as("day")
+                    .andExpression("month").as("month")
+                    .andExpression("year").as("year");
             case "month" -> projectionOperation
-                    .andExpression("toInt(month)").as("month")
-                    .andExpression("toInt(year)").as("year");
+                    .andExpression("month").as("month")
+                    .andExpression("year").as("year");
             case "year" -> projectionOperation
-                    .andExpression("toInt(year)").as("year");
+                    .andExpression("year").as("year");
             default -> projectionOperation;
         };
 
