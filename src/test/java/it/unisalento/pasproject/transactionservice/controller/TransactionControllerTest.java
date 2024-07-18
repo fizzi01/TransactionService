@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static it.unisalento.pasproject.transactionservice.security.SecurityConstants.ROLE_MEMBRO;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
@@ -77,7 +78,7 @@ class TransactionControllerTest {
         transactionDTO.setAmount(100);
         transactionDTO.setCompleted(true);
 
-        given(userCheckService.isCorrectUser(any())).willReturn(true);
+        when(userCheckService.isCorrectUser(EMAIL)).thenReturn(true);
         given(createTransactionSaga.createTransaction(any(TransactionCreationDTO.class))).willReturn(transactionDTO);
 
         mockMvc.perform(post("/api/transactions/create")
@@ -92,16 +93,23 @@ class TransactionControllerTest {
     @Test
     @WithMockUser(username = EMAIL)
     void createTransaction_whenUserNotAuthorized_throwsUserNotAuthorizedException() throws Exception {
-        given(userCheckService.isCorrectUser(any())).willReturn(false);
+        given(userCheckService.isCorrectUser(anyString())).willReturn(false);
+
+        TransactionCreationDTO transactionCreationDTO = new TransactionCreationDTO();
+        transactionCreationDTO.setSenderEmail(EMAIL);
+        transactionCreationDTO.setReceiverEmail(RECEIVER_EMAIL);
+        transactionCreationDTO.setAmount(100);
+        transactionCreationDTO.setDescription("Test transaction");
+        transactionCreationDTO.setTransactionOwner(EMAIL);
 
         mockMvc.perform(post("/api/transactions/create")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{}"))
-                .andExpect(status().isUnauthorized());
+                        .content(new ObjectMapper().writeValueAsString(transactionCreationDTO)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    @WithMockUser(username = EMAIL)
+    @WithMockUser(username = EMAIL, roles = {ROLE_MEMBRO})
     void getTransactionById_whenTransactionExists_returnsTransactionDTO() throws Exception {
         TransactionDTO transactionDTO = new TransactionDTO();
         transactionDTO.setId("1");
@@ -112,9 +120,11 @@ class TransactionControllerTest {
         transaction.setId("1");
         transaction.setAmount(100);
         transaction.setCompleted(true);
+        transaction.setSenderEmail(EMAIL);
+        transaction.setReceiverEmail(RECEIVER_EMAIL);
 
-        given(transactionService.getTransactionDTO(any())).willReturn(transactionDTO);
-        given(userCheckService.isCorrectUser(any())).willReturn(true);
+        given(transactionService.getTransactionDTO(any(Transaction.class))).willReturn(transactionDTO);
+        given(userCheckService.isCorrectUser(anyString())).willReturn(true);
         given(transactionRepository.findById("1")).willReturn(Optional.of(transaction));
 
         mockMvc.perform(get("/api/transactions/find/{id}", "1"))

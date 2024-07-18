@@ -6,6 +6,6 @@ import org.springframework.http.HttpStatus;
 public class UserNotAuthorizedException extends CustomErrorException {
 
     public UserNotAuthorizedException(String message) {
-        super(message, HttpStatus.UNAUTHORIZED);
+        super(message, HttpStatus.BAD_REQUEST);
     }
 }

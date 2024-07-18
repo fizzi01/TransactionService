@@ -40,6 +40,10 @@ public class TransactionController {
     @PostMapping(value="/create", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public TransactionDTO createTransaction(@RequestBody TransactionCreationDTO transactionCreationDTO) throws DatabaseErrorException {
         //Controlla che l'utente sia autorizzato a creare la transazione, ovvero se è il sender corrisponde all'utente loggato
+        if(transactionCreationDTO.getSenderEmail() == null){
+            throw new UserNotAuthorizedException("User not authorized to create transaction.");
+        }
+
         if(!userCheckService.isCorrectUser(transactionCreationDTO.getSenderEmail())){
             throw new UserNotAuthorizedException("User not authorized to create transaction.");
         }
